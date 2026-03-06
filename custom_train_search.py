@@ -92,6 +92,8 @@ parser.add_argument('--init_channels',   type=int,   default=16)
 parser.add_argument('--layers',          type=int,   default=8)
 parser.add_argument('--cutout',          action='store_true', default=False)
 parser.add_argument('--cutout_length',   type=int,   default=16)
+parser.add_argument('--no_augment',      action='store_true', default=False,
+    help='Disable all training-time augmentation (random crop, flip, cutout)')
 parser.add_argument('--drop_path_prob',  type=float, default=0.3)
 parser.add_argument('--arch_learning_rate', type=float, default=6e-4)
 parser.add_argument('--arch_weight_decay',  type=float, default=1e-3)
