@@ -49,6 +49,7 @@ import utils
 from architect import Architect
 from dataset import get_dataset  # <-- the new module
 from model_search import Network
+from logger import Logger
 
 # ───────────────────────────────────────────── argument parsing ─────── #
 parser = argparse.ArgumentParser("PC-DARTS search – custom dataset")
@@ -70,6 +71,18 @@ parser.add_argument(
     "--dataset_std", type=float, nargs=3, default=None, metavar=("R", "G", "B")
 )
 parser.add_argument("--grayscale", action="store_true")
+
+# logger
+parser.add_argument("--logger", type=bool, default=True)
+parser.add_argument("--api", type=str, default="wandb")
+parser.add_argument("--exp_name", type=str, default="NAS")
+parser.add_argument("--port", type=int, default=27028)
+parser.add_argument(
+    "--log_path",
+    type=str,
+    default="/data/iceberg_1/titanic_1/experimentslogs_shared/tau_frugal/stella/",
+)
+parser.add_argument("--tmpdir", type=str, default="temp")
 
 # NpyWebDataset-specific
 parser.add_argument(
@@ -196,45 +209,63 @@ def main():
         num_workers=2,
     )
 
-    # ── model ──────────────────────────────────────────────────────────
-    criterion = nn.CrossEntropyLoss().cuda()
-    model = Network(args.init_channels, n_classes, args.layers, criterion)
-    model = model.cuda()
-    logging.info("param size = %.2f MB", utils.count_parameters_in_MB(model))
+    # logger
+    logger = Logger(experiment_name=args.exp_name, port=args.port, api=args.api, enabled=args.logger)
+    logger.setup_tracking(file_path=args.log_path)
 
-    optimizer = torch.optim.SGD(
-        model.parameters(),
-        args.learning_rate,
-        momentum=args.momentum,
-        weight_decay=args.weight_decay,
-    )
+    with logger():
+        for param, value in args._get_kwargs():
+            if param in ("logger", "api", "exp_name", "port", "log_path", "tmpdir"):
+                continue
+            logger.log_parameter(f"{param}", value)
 
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer, args.epochs, eta_min=args.learning_rate_min
-    )
+        # ── model ──────────────────────────────────────────────────────────
+        criterion = nn.CrossEntropyLoss().cuda()
+        model = Network(args.init_channels, n_classes, args.layers, criterion)
+        model = model.cuda()
+        logging.info("param size = %.2f MB", utils.count_parameters_in_MB(model))
+        logger.watch_pytorch_model(model)
 
-    architect = Architect(model, args)
-
-    # ── loop ───────────────────────────────────────────────────────────
-    for epoch in range(args.epochs):
-        scheduler.step()
-        lr = scheduler.get_last_lr()[0]
-        logging.info("epoch %d  lr %e", epoch, lr)
-
-        genotype = model.genotype()
-        logging.info("genotype = %s", genotype)
-
-        train_acc, _ = train_one_epoch(
-            train_queue, valid_queue, model, architect, criterion, optimizer, lr, epoch
+        optimizer = torch.optim.SGD(
+            model.parameters(),
+            args.learning_rate,
+            momentum=args.momentum,
+            weight_decay=args.weight_decay,
         )
-        logging.info("train_acc %f", train_acc)
 
-        # run validation only at the last epoch (matches original behaviour)
-        if args.epochs - epoch <= 1:
-            valid_acc, _ = infer(valid_queue, model, criterion)
-            logging.info("valid_acc %f", valid_acc)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, args.epochs, eta_min=args.learning_rate_min
+        )
 
-        utils.save(model, os.path.join(args.save, "weights.pt"))
+        architect = Architect(model, args)
+
+        # ── loop ───────────────────────────────────────────────────────────
+        for epoch in range(args.epochs):
+            scheduler.step()
+            lr = scheduler.get_last_lr()[0]
+            logging.info("epoch %d  lr %e", epoch, lr)
+
+            genotype = model.genotype()
+            logging.info("genotype = %s", genotype)
+
+            train_acc, train_loss = train_one_epoch(
+                train_queue, valid_queue, model, architect, criterion, optimizer, lr, epoch
+            )
+            logging.info("train_acc %f", train_acc)
+            logger.log_metric("training/train accuracy", train_acc, epoch, "epoch")
+            logger.log_metric("training/train loss", train_loss, epoch, "epoch")
+
+            # run validation only at the last epoch (matches original behaviour)
+            if args.epochs - epoch <= 1:
+                valid_acc, valid_loss = infer(valid_queue, model, criterion)
+                logging.info("valid_acc %f", valid_acc)
+                logger.log_metric("training/val accuracy", valid_acc, epoch, "epoch")
+                logger.log_metric("training/val loss", valid_loss, epoch, "epoch")
+
+            utils.save(model, os.path.join(args.save, "weights.pt"))
+            logger.log_pytorch_model(model, f"PC-DARTS_{args.dataset}", x=None, path=args.tmpdir, run_id=False)
+            count = count_parameters(model)
+            logger.log_metric("training/nb of parameters", count, epoch, "epoch")
 
 
 def train_one_epoch(
@@ -307,6 +338,9 @@ def infer(valid_queue, model, criterion):
                     top5.avg,
                 )
     return top1.avg, objs.avg
+
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
 if __name__ == "__main__":
