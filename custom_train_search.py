@@ -39,6 +39,8 @@ import os
 import sys
 import time
 
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:False")
+
 import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
