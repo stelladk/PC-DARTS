@@ -49,6 +49,7 @@ import utils
 from architect import Architect
 from dataset import get_dataset  # <-- the new module
 from model_search import Network
+from model import NetworkCIFAR as NetworkEval
 from logger import Logger
 
 # ───────────────────────────────────────────── argument parsing ─────── #
@@ -264,7 +265,8 @@ def main():
 
             utils.save(model, os.path.join(args.save, "weights.pt"))
             logger.log_pytorch_model(model, f"PC-DARTS_{args.dataset}", x=None, path=args.tmpdir, run_id=False)
-            count = count_parameters(model)
+            genotype_model = NetworkEval(args.init_channels, n_classes, args.layers, False, genotype)
+            count = count_parameters(genotype_model)
             logger.log_metric("training/nb of parameters", count, epoch, "epoch")
 
 
