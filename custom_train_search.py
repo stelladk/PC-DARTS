@@ -213,7 +213,7 @@ def main():
     logger = Logger(experiment_name=args.exp_name, port=args.port, api=args.api, enabled=args.logger)
     logger.setup_tracking(file_path=args.log_path)
 
-    with logger():
+    with logger(group="PC-DARTS"):
         for param, value in args._get_kwargs():
             if param in ("logger", "api", "exp_name", "port", "log_path", "tmpdir"):
                 continue
