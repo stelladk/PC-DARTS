@@ -223,7 +223,7 @@ def main():
 
         # ── model ──────────────────────────────────────────────────────────
         criterion = nn.CrossEntropyLoss().cuda()
-        model = Network(args.init_channels, n_classes, args.layers, criterion)
+        model = Network(args.init_channels, n_classes, args.layers, criterion, in_channels=in_channels)
         model = model.cuda()
         logging.info("param size = %.2f MB", utils.count_parameters_in_MB(model))
         logger.watch_pytorch_model(model)
