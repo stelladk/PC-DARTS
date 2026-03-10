@@ -74,7 +74,7 @@ parser.add_argument(
 parser.add_argument("--grayscale", action="store_true")
 
 # logger
-parser.add_argument("--logger", type=bool, default=True)
+parser.add_argument("--no-logger", action="store_true")
 parser.add_argument("--api", type=str, default="wandb")
 parser.add_argument("--exp_name", type=str, default="NAS")
 parser.add_argument("--port", type=int, default=27028)
@@ -211,7 +211,7 @@ def main():
     )
 
     # logger
-    logger = Logger(experiment_name=args.exp_name, port=args.port, api=args.api, enabled=args.logger)
+    logger = Logger(experiment_name=args.exp_name, port=args.port, api=args.api, enabled=not args.no_logger)
     logger.setup_tracking(file_path=args.log_path)
 
     with logger(group="PC-DARTS"):
