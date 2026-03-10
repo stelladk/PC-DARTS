@@ -1,5 +1,5 @@
 """
-dataset.py  —  flexible dataset loading for PC-DARTS  [UPDATED]
+dataset.py  -  flexible dataset loading for PC-DARTS  [UPDATED]
 ================================================================
 Drop this file next to the PC-DARTS source files and import it from
 train_search_custom.py / train_custom.py.
@@ -43,6 +43,8 @@ import numpy as np
 import requests
 import torch
 from PIL import Image
+from tools.augmentations import default_augmentations, get_transforms
+from tools.augmentations import npy_datasets as _NPY_DATASETS_AUG
 from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets, transforms
 
@@ -227,8 +229,8 @@ class NumpyToTensor:
 
       HxW        = 1xHxW   (greyscale, no channel dim)
       HxWxC      = CxHxW   (PIL-style, channels last)
-      CxHxW      = CxHxW   (already channels first — pass through)
-      N (1-D)    = (N,)     (feature vector / time series — no reshape)
+      CxHxW      = CxHxW   (already channels first - pass through)
+      N (1-D)    = (N,)     (feature vector / time series - no reshape)
 
     Values are cast to float32.  If the array is uint8 (0-255) it is
     scaled to [0, 1] automatically.
@@ -243,7 +245,7 @@ class NumpyToTensor:
             x = x[np.newaxis, :, :]
         elif x.ndim == 3 and x.shape[-1] in (1, 3, 4):  # HxWxC = CxHxW
             x = np.transpose(x, (2, 0, 1))
-        # else: already CxHxW or 1-D feature vector — leave as-is
+        # else: already CxHxW or 1-D feature vector - leave as-is
         return torch.from_numpy(x.copy())
 
 
@@ -259,7 +261,7 @@ class NumpyNormalize:
 
     def __call__(self, t: torch.Tensor) -> torch.Tensor:
         if t.ndim < 3:
-            return t  # feature vectors — skip normalisation
+            return t  # feature vectors - skip normalisation
         return (t - self.mean.to(t.device)) / self.std.to(t.device)
 
 
@@ -359,15 +361,15 @@ class NpyWebDataset(Dataset):
 
     Parameters
     ----------
-    url        : str   — direct download URL of the ZIP file
-    train      : bool  — True = train+valid split, False = test split
-    root       : str   — local cache directory
-    name       : str   — human-readable cache key (SHA-256 of URL if empty)
-    download   : bool  — if True, loads everything into RAM; if False, uses
+    url        : str   - direct download URL of the ZIP file
+    train      : bool  - True = train+valid split, False = test split
+    root       : str   - local cache directory
+    name       : str   - human-readable cache key (SHA-256 of URL if empty)
+    download   : bool  - if True, loads everything into RAM; if False, uses
                          memory-mapped lazy loading
-    transform  : callable | None — applied to each sample array
-    data_key   : str   — substring that identifies data files (default '_x')
-    label_key  : str   — substring that identifies label files (default '_y')
+    transform  : callable | None - applied to each sample array
+    data_key   : str   - substring that identifies data files (default '_x')
+    label_key  : str   - substring that identifies label files (default '_y')
     """
 
     def __init__(
@@ -511,7 +513,7 @@ class NpyWebDataset(Dataset):
           (C, H, W)  =  (C, H)
           (H, W, C)  =  (C, H)
           (H, W)     =  (1, H)
-          (N,)       =  (1, N)   feature vector — image_size = N
+          (N,)       =  (1, N)   feature vector - image_size = N
         """
         s = self.shape
         if s is None:
@@ -522,7 +524,7 @@ class NpyWebDataset(Dataset):
                 return s[0], s[1]
             elif s[2] <= 4:  # (H, W, C)
                 return s[2], s[0]
-            else:  # ambiguous — assume (C,H,W)
+            else:  # ambiguous - assume (C,H,W)
                 return s[0], s[1]
         elif len(s) == 2:  # (H, W) greyscale
             return 1, s[0]
@@ -599,7 +601,7 @@ def _(root, train, transform):
 @register_dataset("addnist")
 def _(root, train, transform):
     """
-    NpyWebDataset — numpy arrays downloaded from a URL.
+    NpyWebDataset - numpy arrays downloaded from a URL.
 
     The factory ignores `root` (the cache directory comes from
     args.npyweb_root) and `transform` (built separately in get_dataset
@@ -607,7 +609,7 @@ def _(root, train, transform):
     signature stays compatible with the registry protocol; the real
     construction happens inside get_dataset() / get_val_dataset().
 
-    You should not call this factory directly — use get_dataset(args).
+    You should not call this factory directly - use get_dataset(args).
     """
     dataset = NpyWebDataset(
         url="https://data.ncl.ac.uk/ndownloader/articles/24574354/versions/2",
@@ -637,17 +639,8 @@ def _(root, train, transform):
 
 # ───────────────────────────────────────────────── metadata table ──────── #
 
-# Datasets backed by NpyWebDataset — receive npy_transforms instead of
-# PIL-based generic_transforms.  Add new npy-backed dataset names here.
-NPY_DATASETS = {
-    "addnist",
-    "multnist",
-    "cifartile",
-    "language",
-    "gutenberg",
-    "geoclassing",
-    "chesseract",
-}
+# Datasets backed by NpyWebDataset - sourced from tools.augmentations.
+NPY_DATASETS = _NPY_DATASETS_AUG
 
 # (n_classes, default_image_size, in_channels)
 # n_classes=None means infer at runtime from dataset.classes
@@ -676,19 +669,20 @@ def get_dataset(args):
 
     Required args attributes
     ------------------------
-    args.dataset  : str   — key in DATASET_REGISTRY
-    args.data     : str   — path to dataset root
+    args.dataset  : str   - key in DATASET_REGISTRY
+    args.data     : str   - path to dataset root
 
     Optional args attributes
     ------------------------
-    args.image_size    : int
-    args.num_classes   : int        override auto-detected value
-    args.cutout        : bool
-    args.cutout_length : int
-    args.no_augment    : bool       disable all training-time augmentation
-    args.grayscale     : bool
-    args.dataset_mean  : list[float]
-    args.dataset_std   : list[float]
+    args.image_size         : int
+    args.num_classes        : int        override auto-detected value
+    args.cutout             : bool
+    args.cutout_length      : int
+    args.no_augment         : bool       disable all training-time augmentation
+    args.grayscale          : bool
+    args.dataset_mean       : list[float]
+    args.dataset_std        : list[float]
+    args.data_augmentation  : list[str]  override default_augmentations for this dataset
 
     Returns
     -------
@@ -714,24 +708,37 @@ def get_dataset(args):
     grayscale = getattr(args, "grayscale", False)
     mean = getattr(args, "dataset_mean", None)
     std = getattr(args, "dataset_std", None)
-    augment_train = not no_augment
 
     if grayscale:
         in_channels = 1
 
+    # Determine augmentation list: args override > default_augmentations > None (legacy)
+    if no_augment:
+        aug_list: Optional[List[str]] = []
+    else:
+        aug_list = getattr(args, "data_augmentation", None)
+        if aug_list is None:
+            aug_list = default_augmentations.get(name, None)
+
     # build transform
-    if name in ("cifar10", "cifar100"):
-        transform = cifar_transforms(
-            cutout=cutout, cutout_length=cutout_len, train=augment_train
-        )
+    if aug_list is not None:
+        # Use shared get_transforms from tools.augmentations
+        base_t, aug_t = get_transforms(name, aug_list)
+        if name in NPY_DATASETS:
+            steps = base_t + aug_t
+        else:
+            steps = aug_t + base_t
+        if cutout:
+            steps.append(Cutout(cutout_len))
+        transform = transforms.Compose(steps)
     elif name == "imagenet":
-        transform = imagenet_transforms(image_size=image_size, train=augment_train)
+        transform = imagenet_transforms(image_size=image_size, train=True)
     elif name in NPY_DATASETS:
         transform = npy_transforms(
             image_size=image_size,
             mean=mean or [0.5] * in_channels,
             std=std or [0.5] * in_channels,
-            train=augment_train,
+            train=True,
             cutout=cutout,
             cutout_length=cutout_len,
         )
@@ -740,7 +747,7 @@ def get_dataset(args):
             image_size=image_size,
             mean=mean,
             std=std,
-            train=augment_train,
+            train=True,
             cutout=cutout,
             cutout_length=cutout_len,
             grayscale=grayscale,
@@ -781,8 +788,10 @@ def get_val_dataset(args):
     std = getattr(args, "dataset_std", None)
 
     in_channels = DATASET_META.get(name, (None, 224, 3))[2]
-    if name in ("cifar10", "cifar100"):
-        transform = cifar_transforms(train=False)
+    # Validation always uses base transforms only (no augmentation)
+    if name in default_augmentations:
+        base_t, _ = get_transforms(name, [])
+        transform = transforms.Compose(base_t)
     elif name == "imagenet":
         transform = imagenet_transforms(image_size=image_size, train=False)
     elif name in NPY_DATASETS:
