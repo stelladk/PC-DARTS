@@ -185,7 +185,7 @@ def main():
     logging.info("args = %s", args)
 
     # ── dataset ────────────────────────────────────────────────────────
-    train_data, n_classes, in_channels = get_dataset(args)
+    train_data, test_data, n_classes, in_channels = get_dataset(args)
     logging.info(
         "Dataset=%s  classes=%d  in_channels=%d", args.dataset, n_classes, in_channels
     )
@@ -206,6 +206,14 @@ def main():
         train_data,
         batch_size=args.batch_size,
         sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split:num_train]),
+        pin_memory=True,
+        num_workers=2,
+    )
+
+    test_queue = torch.utils.data.DataLoader(
+        test_data,
+        batch_size=args.batch_size,
+        shuffle=False,
         pin_memory=True,
         num_workers=2,
     )
@@ -253,21 +261,25 @@ def main():
                 train_queue, valid_queue, model, architect, criterion, optimizer, lr, epoch
             )
             logging.info("train_acc %f", train_acc)
-            logger.log_metric("training/train accuracy", train_acc, epoch, "epoch")
+            logger.log_metric("training/train accuracy", train_acc/100, epoch, "epoch")
             logger.log_metric("training/train loss", train_loss, epoch, "epoch")
 
-            # run validation only at the last epoch (matches original behaviour)
-            if args.epochs - epoch <= 1:
-                valid_acc, valid_loss = infer(valid_queue, model, criterion)
-                logging.info("valid_acc %f", valid_acc)
-                logger.log_metric("training/val accuracy", valid_acc, epoch, "epoch")
-                logger.log_metric("training/val loss", valid_loss, epoch, "epoch")
+            valid_acc, valid_loss = infer(valid_queue, model, criterion)
+            logging.info("valid_acc %f", valid_acc)
+            logger.log_metric("training/val accuracy", valid_acc/100, epoch, "epoch")
+            logger.log_metric("training/val loss", valid_loss, epoch, "epoch")
 
             utils.save(model, os.path.join(args.save, "weights.pt"))
             logger.log_pytorch_model(model, f"PC-DARTS_{args.dataset}", x=None, path=args.tmpdir, run_id=False)
             genotype_model = NetworkEval(args.init_channels, n_classes, args.layers, False, genotype)
             count = count_parameters(genotype_model)
             logger.log_metric("training/nb of parameters", count, epoch, "epoch")
+
+            if args.epochs - epoch <= 1:
+                test_acc, test_loss = infer(test_queue, model, criterion)
+                logging.info("test_acc %f  test_loss %f", test_acc, test_loss)
+                logger.log_metric("training/test accuracy", test_acc / 100, epoch, "epoch")
+                logger.log_metric("training/test loss", test_loss, epoch, "epoch")
 
 
 def train_one_epoch(

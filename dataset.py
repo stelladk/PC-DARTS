@@ -753,7 +753,26 @@ def get_dataset(args):
             grayscale=grayscale,
         )
 
+    # Build base (no-augmentation) transforms for the test split
+    if aug_list is not None:
+        base_t, _ = get_transforms(name, [])
+        base_transform = transforms.Compose(base_t) if base_t else None
+    elif name == "imagenet":
+        base_transform = imagenet_transforms(image_size=image_size, train=False)
+    elif name in NPY_DATASETS:
+        base_transform = npy_transforms(
+            image_size=image_size,
+            mean=mean or [0.5] * in_channels,
+            std=std or [0.5] * in_channels,
+            train=False,
+        )
+    else:
+        base_transform = generic_transforms(
+            image_size=image_size, mean=mean, std=std, train=False, grayscale=grayscale
+        )
+
     train_data = DATASET_REGISTRY[name](root=args.data, train=True, transform=transform)
+    test_data = DATASET_REGISTRY[name](root=args.data, train=False, transform=base_transform)
 
     # infer n_classes
     if n_classes_meta is not None:
@@ -771,7 +790,7 @@ def get_dataset(args):
     if getattr(args, "num_classes", None):
         n_classes = args.num_classes
 
-    return train_data, n_classes, in_channels
+    return train_data, test_data, n_classes, in_channels
 
 
 def get_val_dataset(args):
