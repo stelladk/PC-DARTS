@@ -1,9 +1,6 @@
 # Python
 __pycache__
 
-# Executables
-*.sh
-
 # IDE
 .vscode
 
