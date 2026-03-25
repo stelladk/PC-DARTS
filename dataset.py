@@ -637,6 +637,96 @@ def _(root, train, transform):
     return dataset
 
 
+@register_dataset("cifartile")
+def _(root, train, transform):
+    dataset = NpyWebDataset(
+        url="https://data.ncl.ac.uk/ndownloader/articles/24551539/versions/1",
+        name="CIFARTile",
+        train=train,
+        root=root,
+        download=True,
+        transform=transform,
+    )
+    if dataset.data.ndim == 4:
+        dataset.data = dataset.data.transpose(0, 2, 3, 1)
+    return dataset
+
+
+@register_dataset("language")
+def _(root, train, transform):
+    dataset = NpyWebDataset(
+        url="https://data.ncl.ac.uk/ndownloader/articles/24574729/versions/1",
+        name="LanguageASPELL",
+        train=train,
+        root=root,
+        download=True,
+        transform=transform,
+    )
+    if dataset.data.ndim == 4:
+        dataset.data = dataset.data.transpose(0, 2, 3, 1)
+    return dataset
+
+
+@register_dataset("gutenberg")
+def _(root, train, transform):
+    dataset = NpyWebDataset(
+        url="https://data.ncl.ac.uk/ndownloader/articles/24574753/versions/1",
+        name="Gutenberg",
+        train=train,
+        root=root,
+        download=True,
+        transform=transform,
+    )
+    if dataset.data.ndim == 4:
+        dataset.data = dataset.data.transpose(0, 2, 3, 1)
+    return dataset
+
+
+@register_dataset("geoclassing")
+def _(root, train, transform):
+    dataset = NpyWebDataset(
+        url="https://data.ncl.ac.uk/ndownloader/articles/24050256/versions/3",
+        name="GeoClassing",
+        train=train,
+        root=root,
+        download=True,
+        transform=transform,
+    )
+    if dataset.data.ndim == 4:
+        dataset.data = dataset.data.transpose(0, 2, 3, 1)
+    return dataset
+
+
+@register_dataset("chesseract")
+def _(root, train, transform):
+    dataset = NpyWebDataset(
+        url="https://data.ncl.ac.uk/ndownloader/articles/24118743/versions/2",
+        name="Chesseract",
+        train=train,
+        root=root,
+        download=True,
+        transform=transform,
+    )
+    if dataset.data.ndim == 4:
+        dataset.data = dataset.data.transpose(0, 2, 3, 1)
+    return dataset
+
+
+@register_dataset("gameoflife")
+def _(root, train, transform):
+    dataset = NpyWebDataset(
+        url="https://data.ncl.ac.uk/ndownloader/articles/30000835/versions/1",
+        name="GameOfLife",
+        train=train,
+        root=root,
+        download=True,
+        transform=transform,
+    )
+    if dataset.data.ndim == 4:
+        dataset.data = dataset.data.transpose(0, 2, 3, 1)
+    return dataset
+
+
 # ───────────────────────────────────────────────── metadata table ──────── #
 
 # Datasets backed by NpyWebDataset - sourced from tools.augmentations.
@@ -655,8 +745,13 @@ DATASET_META = {
     "food101": (101, 224, 3),
     "flat": (1, 32, 3),
     "addnist": (20, 28, 3),
-    "multinist": (10, 28, 3),
+    "multnist": (10, 28, 3),
     "cifartile": (4, 32, 3),
+    "language": (10, 128, 1),
+    "gutenberg": (6, 128, 1),
+    "geoclassing": (10, 64, 3),
+    "chesseract": (3, 32, 12),
+    "gameoflife": (25, 32, 1),
 }
 
 
