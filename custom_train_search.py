@@ -156,6 +156,21 @@ parser.add_argument(
 parser.add_argument("--save", type=str, default="EXP")
 parser.add_argument("--seed", type=int, default=2)
 
+# evaluation phase (runs after search with the found genotype)
+parser.add_argument("--skip_eval", action="store_true", default=False,
+                    help="Skip the evaluation training phase after search")
+parser.add_argument("--eval_epochs", type=int, default=100,
+                    help="Epochs to train the found architecture (default 100; full PC-DARTS uses 600)")
+parser.add_argument("--eval_init_channels", type=int, default=36,
+                    help="Initial channels for the evaluation model (default 36)")
+parser.add_argument("--eval_layers", type=int, default=20,
+                    help="Total layers for the evaluation model (default 20)")
+parser.add_argument("--eval_batch_size", type=int, default=96)
+parser.add_argument("--eval_learning_rate", type=float, default=0.025)
+parser.add_argument("--auxiliary", action="store_true", default=False,
+                    help="Use auxiliary tower in the evaluation model")
+parser.add_argument("--auxiliary_weight", type=float, default=0.4)
+
 args = parser.parse_args()
 args.save = "search-{}-{}".format(args.save, time.strftime("%Y%m%d-%H%M%S"))
 utils.create_exp_dir(args.save, scripts_to_save=glob.glob("*.py"))
@@ -261,25 +276,26 @@ def main():
                 train_queue, valid_queue, model, architect, criterion, optimizer, lr, epoch
             )
             logging.info("train_acc %f", train_acc)
-            logger.log_metric("training/train accuracy", train_acc/100, epoch, "epoch")
-            logger.log_metric("training/train loss", train_loss, epoch, "epoch")
+            logger.log_metric("search/train accuracy", train_acc/100, epoch, "search epoch")
+            logger.log_metric("search/train loss", train_loss, epoch, "search epoch")
 
             valid_acc, valid_loss = infer(valid_queue, model, criterion)
             logging.info("valid_acc %f", valid_acc)
-            logger.log_metric("training/val accuracy", valid_acc/100, epoch, "epoch")
-            logger.log_metric("training/val loss", valid_loss, epoch, "epoch")
+            logger.log_metric("search/val accuracy", valid_acc/100, epoch, "search epoch")
+            logger.log_metric("search/val loss", valid_loss, epoch, "search epoch")
 
             utils.save(model, os.path.join(args.save, "weights.pt"))
             logger.log_pytorch_model(model, f"PC-DARTS_{args.dataset}", x=None, path=args.tmpdir, run_id=False)
-            genotype_model = NetworkEval(args.init_channels, n_classes, args.layers, False, genotype)
-            count = count_parameters(genotype_model)
-            logger.log_metric("training/nb of parameters", count, epoch, "epoch")
 
-            if args.epochs - epoch <= 1:
-                test_acc, test_loss = infer(test_queue, model, criterion)
-                logging.info("test_acc %f  test_loss %f", test_acc, test_loss)
-                logger.log_metric("training/test accuracy", test_acc / 100, epoch, "epoch")
-                logger.log_metric("training/test loss", test_loss, epoch, "epoch")
+        # ── post-search ────────────────────────────────────────────────────
+        genotype = model.genotype()
+        logging.info("Final genotype = %s", genotype)
+
+        if not args.skip_eval:
+            _run_eval_phase(
+                genotype, n_classes, train_data, test_queue,
+                criterion, logger,
+            )
 
 
 def train_one_epoch(
@@ -352,6 +368,121 @@ def infer(valid_queue, model, criterion):
                     top5.avg,
                 )
     return top1.avg, objs.avg
+
+def train_eval_epoch(train_queue, model, criterion, optimizer):
+    """Train one epoch of the discrete evaluation model (NetworkCIFAR)."""
+    objs = utils.AvgrageMeter()
+    top1 = utils.AvgrageMeter()
+    top5 = utils.AvgrageMeter()
+    model.train()
+
+    for step, (x, y) in enumerate(train_queue):
+        x = x.cuda()
+        y = y.cuda()
+        optimizer.zero_grad()
+        logits, logits_aux = model(x)
+        loss = criterion(logits, y)
+        if logits_aux is not None:
+            loss += args.auxiliary_weight * criterion(logits_aux, y)
+        loss.backward()
+        nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
+        optimizer.step()
+
+        p1, p5 = utils.accuracy(logits, y, topk=(1, 5))
+        n = x.size(0)
+        objs.update(loss.item(), n)
+        top1.update(p1.item(), n)
+        top5.update(p5.item(), n)
+
+        if step % args.report_freq == 0:
+            logging.info("eval_train %03d  loss=%.4f  top1=%.2f  top5=%.2f",
+                         step, objs.avg, top1.avg, top5.avg)
+
+    return top1.avg, objs.avg
+
+
+def infer_eval(queue, model, criterion):
+    """Inference for NetworkCIFAR, which returns (logits, logits_aux)."""
+    objs = utils.AvgrageMeter()
+    top1 = utils.AvgrageMeter()
+    top5 = utils.AvgrageMeter()
+    model.eval()
+    with torch.no_grad():
+        for step, (x, y) in enumerate(queue):
+            x = x.cuda()
+            y = y.cuda()
+            logits, _ = model(x)
+            loss = criterion(logits, y)
+            p1, p5 = utils.accuracy(logits, y, topk=(1, 5))
+            n = x.size(0)
+            objs.update(loss.item(), n)
+            top1.update(p1.item(), n)
+            top5.update(p5.item(), n)
+            if step % args.report_freq == 0:
+                logging.info("eval_infer %03d  loss=%.4f  top1=%.2f  top5=%.2f",
+                             step, objs.avg, top1.avg, top5.avg)
+    return top1.avg, objs.avg
+
+
+def _run_eval_phase(genotype, n_classes, train_data, test_queue, criterion, logger):
+    """
+    Build a fresh NetworkCIFAR from the found genotype, train it for
+    args.eval_epochs, then evaluate on the test set.
+
+    This is the standard PC-DARTS evaluation phase (equivalent to train.py),
+    run inline immediately after the search.
+    """
+    logging.info("=== Evaluation phase: training found architecture ===")
+    logging.info("  init_channels=%d  layers=%d  epochs=%d  auxiliary=%s",
+                 args.eval_init_channels, args.eval_layers,
+                 args.eval_epochs, args.auxiliary)
+
+    eval_model = NetworkEval(
+        args.eval_init_channels, n_classes, args.eval_layers,
+        args.auxiliary, genotype,
+    )
+    eval_model = eval_model.cuda()
+    eval_model.drop_path_prob = 0.0
+    logging.info("eval model param size = %.2f MB",
+                 utils.count_parameters_in_MB(eval_model))
+    logging.info("eval model nb of parameters = %d", count_parameters(eval_model))
+    logger.log_metric("training/nb of parameters", count_parameters(eval_model), 0, "epoch")
+
+    full_train_queue = torch.utils.data.DataLoader(
+        train_data,
+        batch_size=args.eval_batch_size,
+        shuffle=True,
+        pin_memory=True,
+        num_workers=2,
+    )
+
+    eval_optimizer = torch.optim.SGD(
+        eval_model.parameters(),
+        args.eval_learning_rate,
+        momentum=args.momentum,
+        weight_decay=args.weight_decay,
+    )
+    eval_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        eval_optimizer, args.eval_epochs, eta_min=0.0
+    )
+
+    for eval_epoch in range(args.eval_epochs):
+        eval_model.drop_path_prob = args.drop_path_prob * eval_epoch / args.eval_epochs
+        train_acc, train_loss = train_eval_epoch(full_train_queue, eval_model, criterion, eval_optimizer)
+        eval_scheduler.step()
+
+        logging.info("eval epoch %d  train_acc=%.2f  train_loss=%.4f", eval_epoch, train_acc, train_loss)
+        logger.log_metric("training/train accuracy", train_acc / 100, eval_epoch, "epoch")
+        logger.log_metric("training/train loss", train_loss, eval_epoch, "epoch")
+
+        utils.save(eval_model, os.path.join(args.save, "eval_weights.pt"))
+
+        test_acc, test_loss = infer_eval(test_queue, eval_model, criterion)
+        logging.info("eval test_acc=%.2f  test_loss=%.4f", test_acc, test_loss)
+        logger.log_metric("training/test accuracy", test_acc / 100, eval_epoch, "epoch")
+        logger.log_metric("training/test loss", test_loss, eval_epoch, "epoch")
+    logger.log_pytorch_model(eval_model, f"PC-DARTS_{args.dataset}_eval", x=None, path=args.tmpdir, run_id=False)
+
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
