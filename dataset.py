@@ -679,6 +679,7 @@ def _(root, train, transform):
     )
     if dataset.data.ndim == 4:
         dataset.data = dataset.data.transpose(0, 2, 3, 1)
+    dataset.data = np.pad(dataset.data, ((0, 0), (0, 1), (1, 1), (0, 0)))
     return dataset
 
 
