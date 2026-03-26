@@ -23,7 +23,7 @@ class AvgrageMeter(object):
 
 
 def accuracy(output, target, topk=(1,)):
-  maxk = max(topk)
+  maxk = min(max(topk), output.size(1))
   batch_size = target.size(0)
 
   _, pred = output.topk(maxk, 1, True, True)
