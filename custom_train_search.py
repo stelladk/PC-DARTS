@@ -293,7 +293,7 @@ def main():
 
         if not args.skip_eval:
             _run_eval_phase(
-                genotype, n_classes, train_data, test_queue,
+                genotype, n_classes, in_channels, train_data, test_queue,
                 criterion, logger,
             )
 
@@ -424,7 +424,7 @@ def infer_eval(queue, model, criterion):
     return top1.avg, objs.avg
 
 
-def _run_eval_phase(genotype, n_classes, train_data, test_queue, criterion, logger):
+def _run_eval_phase(genotype, n_classes, in_channels, train_data, test_queue, criterion, logger):
     """
     Build a fresh NetworkCIFAR from the found genotype, train it for
     args.eval_epochs, then evaluate on the test set.
@@ -439,7 +439,7 @@ def _run_eval_phase(genotype, n_classes, train_data, test_queue, criterion, logg
 
     eval_model = NetworkEval(
         args.eval_init_channels, n_classes, args.eval_layers,
-        args.auxiliary, genotype,
+        args.auxiliary, genotype, in_channels=in_channels,
     )
     eval_model = eval_model.cuda()
     eval_model.drop_path_prob = 0.0
