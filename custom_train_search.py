@@ -291,6 +291,9 @@ def main():
         genotype = model.genotype()
         logging.info("Final genotype = %s", genotype)
 
+        del model, architect, optimizer, scheduler
+        torch.cuda.empty_cache()
+
         if not args.skip_eval:
             _run_eval_phase(
                 genotype, n_classes, in_channels, train_data, test_queue,
