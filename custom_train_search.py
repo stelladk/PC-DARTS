@@ -46,11 +46,13 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 import utils
+import genotypes as gt
 from architect import Architect
 from dataset import get_dataset  # <-- the new module
 from model_search import Network
 from model import NetworkCIFAR as NetworkEval
 from logger import Logger
+from genotypes import PRIMITIVES
 
 # ───────────────────────────────────────────── argument parsing ─────── #
 parser = argparse.ArgumentParser("PC-DARTS search – custom dataset")
@@ -155,6 +157,12 @@ parser.add_argument(
 )
 parser.add_argument("--save", type=str, default="EXP")
 parser.add_argument("--seed", type=int, default=2)
+parser.add_argument(
+    "--init_genotype",
+    type=str,
+    default=None,
+    help="Name of a genotype in genotypes.py to warm-start arch parameters from (e.g. PCDARTS_multnist_ep30)",
+)
 
 # evaluation phase (runs after search with the found genotype)
 parser.add_argument("--skip_eval", action="store_true", default=False,
@@ -182,6 +190,41 @@ logging.basicConfig(
 fh = logging.FileHandler(os.path.join(args.save, "log.txt"))
 fh.setFormatter(logging.Formatter(log_format))
 logging.getLogger().addHandler(fh)
+
+
+# ──────────────────────────────────── arch warm-start from genotype ─── #
+def _init_alphas_from_genotype(model, genotype, boost=5.0):
+    """
+    Warm-start the search model's architecture parameters (alphas / betas)
+    so that the operations and edges described by *genotype* start with a
+    higher logit than the rest.
+
+    The model still explores freely — non-selected ops/edges start at 0
+    while selected ones start at *boost* — but the search begins close to
+    the given genotype rather than from a random flat prior.
+    """
+    steps = model._steps
+
+    # Global edge index where step i begins
+    step_starts = []
+    s = 0
+    for i in range(steps):
+        step_starts.append(s)
+        s += 2 + i
+
+    def _fill(alphas, betas, gene):
+        alphas.zero_()
+        betas.zero_()
+        for step_i in range(steps):
+            for op_name, node_idx in (gene[2 * step_i], gene[2 * step_i + 1]):
+                global_edge_idx = step_starts[step_i] + node_idx
+                op_idx = PRIMITIVES.index(op_name)
+                alphas[global_edge_idx][op_idx] += boost
+                betas[global_edge_idx] += boost
+
+    with torch.no_grad():
+        _fill(model.alphas_normal.data, model.betas_normal.data, genotype.normal)
+        _fill(model.alphas_reduce.data, model.betas_reduce.data, genotype.reduce)
 
 
 # ───────────────────────────────────────────────────────── main ─────── #
@@ -247,6 +290,13 @@ def main():
         criterion = nn.CrossEntropyLoss().cuda()
         model = Network(args.init_channels, n_classes, args.layers, criterion, in_channels=in_channels)
         model = model.cuda()
+
+        if args.init_genotype is not None:
+            init_geno = getattr(gt, args.init_genotype)
+            _init_alphas_from_genotype(model, init_geno)
+            logging.info("Warm-started arch parameters from genotype: %s", args.init_genotype)
+            logging.info("  %s", init_geno)
+
         logging.info("param size = %.2f MB", utils.count_parameters_in_MB(model))
         logger.watch_pytorch_model(model)
 
