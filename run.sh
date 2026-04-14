@@ -2,12 +2,13 @@
 
 #SBATCH --job-name=PCDARTS
 #SBATCH --output=slurm/slurm-%x-%A_%a.out
-#SBATCH --time=5-00:10:00
+# SBATCH --time=5-00:10:00
+#SBATCH --time=03:00:00
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
-#SBATCH -p gpu-best
+#SBATCH -p tau
 #SBATCH --exclude=margpu018,margpu021
-#SBATCH --array=[1-5]
+# SBATCH --array=[1-3]
 
 STAGGER_SECONDS=5
 SLEEP_TIME=$(( (SLURM_ARRAY_TASK_ID - 1) * STAGGER_SECONDS ))
@@ -27,4 +28,9 @@ echo "NODE NAME = ${SLURMD_NODENAME}"
 
 echo "DATASET = ${NAS_DATASET}"
 
-python custom_train_search.py --dataset "${NAS_DATASET}"
+python custom_train_search.py --dataset "${NAS_DATASET}" \
+    --batch_size "${BATCH_SIZE}" \
+    --eval_batch_size "${BATCH_SIZE}" \
+    --epochs 50 --eval_epochs 200 \
+    --eval_batch_size 4 \
+    --exp_name Budget --init_genotype PCDARTS_different_thunder_22

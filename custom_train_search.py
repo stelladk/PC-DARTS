@@ -49,6 +49,7 @@ import utils
 import genotypes as gt
 from architect import Architect
 from dataset import get_dataset  # <-- the new module
+from genotypes import Genotype
 from model_search import Network
 from model import NetworkCIFAR as NetworkEval
 from logger import Logger
@@ -58,7 +59,7 @@ from genotypes import PRIMITIVES
 parser = argparse.ArgumentParser("PC-DARTS search – custom dataset")
 
 # data
-parser.add_argument("--data", type=str, default="../data")
+parser.add_argument("--data", type=str, default="/scratch/sdouka/data")
 parser.add_argument(
     "--dataset",
     type=str,
@@ -288,6 +289,15 @@ def main():
 
         # ── model ──────────────────────────────────────────────────────────
         criterion = nn.CrossEntropyLoss().cuda()
+
+        genotype = None
+        if genotype is not None:
+            _run_eval_phase(
+                genotype, n_classes, in_channels, train_data, test_queue,
+                criterion, logger,
+            )
+            return
+
         model = Network(args.init_channels, n_classes, args.layers, criterion, in_channels=in_channels)
         model = model.cuda()
 

@@ -52,7 +52,7 @@ from dataset import get_dataset
 # ── args ──────────────────────────────────────────────────────────────────────
 parser = argparse.ArgumentParser()
 parser.add_argument('--log',      required=True, help='path to the slurm/training log file')
-parser.add_argument('--data',     default=None,  help='dataset root; parsed from --log if omitted')
+parser.add_argument('--data',     default="/scratch/sdouka/data",  help='dataset root; parsed from --log if omitted')
 parser.add_argument('--weights',  default=None,
                     help='path to weights.pt; derived from --log if omitted')
 parser.add_argument('--from_log_genotype', action='store_true', default=False,
@@ -82,7 +82,7 @@ parser.add_argument('--npyweb_data_key',  type=str, default='_x')
 parser.add_argument('--npyweb_label_key', type=str, default='_y')
 parser.add_argument('--npyweb_preload',   action='store_true', default=True)
 # logging
-parser.add_argument('--experiment_name', type=str, default='NAS')
+parser.add_argument('--experiment_name', type=str, default='Budget')
 parser.add_argument('--no-logger', action='store_true', default=False)
 parser.add_argument('--logger_api', type=str, default='wandb', choices=['mlflow', 'wandb'])
 parser.add_argument('--logger_port', type=int, default=27027)
