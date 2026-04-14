@@ -181,7 +181,7 @@ parser.add_argument("--auxiliary", action="store_true", default=False,
 parser.add_argument("--auxiliary_weight", type=float, default=0.4)
 
 args = parser.parse_args()
-args.save = "search-{}-{}".format(args.save, time.strftime("%Y%m%d-%H%M%S"))
+args.save = "{}PC-DARTS/search-{}-{}".format(args.tmpdir, args.save, time.strftime("%Y%m%d-%H%M%S"))
 utils.create_exp_dir(args.save, scripts_to_save=glob.glob("*.py"))
 
 log_format = "%(asctime)s %(message)s"
