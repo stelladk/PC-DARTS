@@ -344,6 +344,11 @@ def main():
             logger.log_metric("search/val accuracy", valid_acc/100, epoch, "search epoch")
             logger.log_metric("search/val loss", valid_loss, epoch, "search epoch")
 
+            test_acc, test_loss = infer(test_queue, model, criterion)
+            logging.info("test_acc %f", test_acc)
+            logger.log_metric("search/test accuracy", test_acc/100, epoch, "search epoch")
+            logger.log_metric("search/test loss", test_loss, epoch, "search epoch")
+
             utils.save(model, os.path.join(args.save, "weights.pt"))
             logger.log_pytorch_model(model, f"PC-DARTS_{args.dataset}", x=None, path=args.tmpdir, run_id=False)
 
