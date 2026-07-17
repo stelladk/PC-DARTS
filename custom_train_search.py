@@ -165,6 +165,16 @@ parser.add_argument(
     help="Name of a genotype in genotypes.py to warm-start arch parameters from (e.g. PCDARTS_multnist_ep30)",
 )
 
+# checkpointing
+parser.add_argument(
+    "--resume",
+    type=str,
+    default=None,
+    help="Path to a checkpoint.pt (search or eval phase) to resume an interrupted run from. "
+         "The checkpoint records which phase it belongs to, so this works whether the run "
+         "was interrupted during search or during the post-search evaluation training.",
+)
+
 # evaluation phase (runs after search with the found genotype)
 parser.add_argument("--skip_eval", action="store_true", default=False,
                     help="Skip the evaluation training phase after search")
@@ -228,6 +238,54 @@ def _init_alphas_from_genotype(model, genotype, boost=5.0):
         _fill(model.alphas_reduce.data, model.betas_reduce.data, genotype.reduce)
 
 
+# ──────────────────────────────────────────── checkpoint / resume ───── #
+# Each phase writes to a single fixed filename that gets overwritten every
+# epoch, so a long run never accumulates more than one checkpoint per phase.
+def _save_search_checkpoint(path, next_epoch, model, optimizer, scheduler, architect):
+    torch.save({
+        "phase": "search",
+        "epoch": next_epoch,
+        "model_state": model.state_dict(),
+        # alphas/betas are plain Variables, not nn.Parameters, so they are
+        # not part of model.state_dict() and must be saved separately.
+        "alphas_normal": model.alphas_normal.data,
+        "alphas_reduce": model.alphas_reduce.data,
+        "betas_normal": model.betas_normal.data,
+        "betas_reduce": model.betas_reduce.data,
+        "optimizer_state": optimizer.state_dict(),
+        "scheduler_state": scheduler.state_dict(),
+        "architect_optimizer_state": architect.optimizer.state_dict(),
+    }, path)
+
+
+def _load_search_checkpoint(ckpt, model, optimizer, scheduler, architect):
+    model.load_state_dict(ckpt["model_state"])
+    model.alphas_normal.data.copy_(ckpt["alphas_normal"])
+    model.alphas_reduce.data.copy_(ckpt["alphas_reduce"])
+    model.betas_normal.data.copy_(ckpt["betas_normal"])
+    model.betas_reduce.data.copy_(ckpt["betas_reduce"])
+    optimizer.load_state_dict(ckpt["optimizer_state"])
+    scheduler.load_state_dict(ckpt["scheduler_state"])
+    architect.optimizer.load_state_dict(ckpt["architect_optimizer_state"])
+
+
+def _save_eval_checkpoint(path, next_epoch, genotype, model, optimizer, scheduler):
+    torch.save({
+        "phase": "eval",
+        "epoch": next_epoch,
+        "genotype": genotype,
+        "model_state": model.state_dict(),
+        "optimizer_state": optimizer.state_dict(),
+        "scheduler_state": scheduler.state_dict(),
+    }, path)
+
+
+def _load_eval_checkpoint(ckpt, model, optimizer, scheduler):
+    model.load_state_dict(ckpt["model_state"])
+    optimizer.load_state_dict(ckpt["optimizer_state"])
+    scheduler.load_state_dict(ckpt["scheduler_state"])
+
+
 # ───────────────────────────────────────────────────────── main ─────── #
 def main():
     if not torch.cuda.is_available():
@@ -281,6 +339,20 @@ def main():
     logger = Logger(experiment_name=args.exp_name, port=args.port, api=args.api, enabled=not args.no_logger)
     logger.setup_tracking(file_path=args.log_path)
 
+    # ── resume ────────────────────────────────────────────────────────────
+    # A single checkpoint file per phase, overwritten every epoch, so an
+    # interrupted run never leaves behind more than one file per phase.
+    search_ckpt_path = os.path.join(args.save, "checkpoint.pt")
+    eval_ckpt_path = os.path.join(args.save, "eval_checkpoint.pt")
+
+    resume_ckpt = None
+    if args.resume is not None:
+        resume_ckpt = torch.load(args.resume, map_location=f"cuda:{args.gpu}")
+        logging.info(
+            "Resuming from %s (phase=%s, epoch=%d)",
+            args.resume, resume_ckpt["phase"], resume_ckpt["epoch"],
+        )
+
     with logger(group="PC-DARTS"):
         for param, value in args._get_kwargs():
             if param in ("logger", "api", "exp_name", "port", "log_path", "tmpdir"):
@@ -290,79 +362,85 @@ def main():
         # ── model ──────────────────────────────────────────────────────────
         criterion = nn.CrossEntropyLoss().cuda()
 
-        genotype = None
-        if genotype is not None:
-            _run_eval_phase(
-                genotype, n_classes, in_channels, train_data, test_queue,
-                criterion, logger,
+        if resume_ckpt is not None and resume_ckpt["phase"] == "eval":
+            # Search already finished in the interrupted run; skip straight
+            # to resuming the evaluation-training phase.
+            genotype = resume_ckpt["genotype"]
+            logging.info("Skipping search phase; resuming eval phase with genotype: %s", genotype)
+        else:
+            model = Network(args.init_channels, n_classes, args.layers, criterion, in_channels=in_channels)
+            model = model.cuda()
+
+            start_epoch = 0
+            if resume_ckpt is not None:
+                start_epoch = resume_ckpt["epoch"]
+            elif args.init_genotype is not None:
+                init_geno = getattr(gt, args.init_genotype)
+                _init_alphas_from_genotype(model, init_geno)
+                logging.info("Warm-started arch parameters from genotype: %s", args.init_genotype)
+                logging.info("  %s", init_geno)
+
+            logging.info("param size = %.2f MB", utils.count_parameters_in_MB(model))
+            logger.watch_pytorch_model(model)
+
+            optimizer = torch.optim.SGD(
+                model.parameters(),
+                args.learning_rate,
+                momentum=args.momentum,
+                weight_decay=args.weight_decay,
             )
-            return
 
-        model = Network(args.init_channels, n_classes, args.layers, criterion, in_channels=in_channels)
-        model = model.cuda()
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+                optimizer, args.epochs, eta_min=args.learning_rate_min
+            )
 
-        if args.init_genotype is not None:
-            init_geno = getattr(gt, args.init_genotype)
-            _init_alphas_from_genotype(model, init_geno)
-            logging.info("Warm-started arch parameters from genotype: %s", args.init_genotype)
-            logging.info("  %s", init_geno)
+            architect = Architect(model, args)
 
-        logging.info("param size = %.2f MB", utils.count_parameters_in_MB(model))
-        logger.watch_pytorch_model(model)
+            if resume_ckpt is not None:
+                _load_search_checkpoint(resume_ckpt, model, optimizer, scheduler, architect)
 
-        optimizer = torch.optim.SGD(
-            model.parameters(),
-            args.learning_rate,
-            momentum=args.momentum,
-            weight_decay=args.weight_decay,
-        )
+            # ── loop ───────────────────────────────────────────────────────
+            for epoch in range(start_epoch, args.epochs):
+                scheduler.step()
+                lr = scheduler.get_last_lr()[0]
+                logging.info("epoch %d  lr %e", epoch, lr)
 
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            optimizer, args.epochs, eta_min=args.learning_rate_min
-        )
+                genotype = model.genotype()
+                logging.info("genotype = %s", genotype)
 
-        architect = Architect(model, args)
+                train_acc, train_loss = train_one_epoch(
+                    train_queue, valid_queue, model, architect, criterion, optimizer, lr, epoch
+                )
+                logging.info("train_acc %f", train_acc)
+                logger.log_metric("search/train accuracy", train_acc/100, epoch, "search epoch")
+                logger.log_metric("search/train loss", train_loss, epoch, "search epoch")
 
-        # ── loop ───────────────────────────────────────────────────────────
-        for epoch in range(args.epochs):
-            scheduler.step()
-            lr = scheduler.get_last_lr()[0]
-            logging.info("epoch %d  lr %e", epoch, lr)
+                valid_acc, valid_loss = infer(valid_queue, model, criterion)
+                logging.info("valid_acc %f", valid_acc)
+                logger.log_metric("search/val accuracy", valid_acc/100, epoch, "search epoch")
+                logger.log_metric("search/val loss", valid_loss, epoch, "search epoch")
 
+                test_acc, test_loss = infer(test_queue, model, criterion)
+                logging.info("test_acc %f", test_acc)
+                logger.log_metric("search/test accuracy", test_acc/100, epoch, "search epoch")
+                logger.log_metric("search/test loss", test_loss, epoch, "search epoch")
+
+                utils.save(model, os.path.join(args.save, "weights.pt"))
+                logger.log_pytorch_model(model, f"PC-DARTS_{args.dataset}", x=None, path=args.tmpdir, run_id=False)
+                _save_search_checkpoint(search_ckpt_path, epoch + 1, model, optimizer, scheduler, architect)
+
+            # ── post-search ────────────────────────────────────────────────
             genotype = model.genotype()
-            logging.info("genotype = %s", genotype)
+            logging.info("Final genotype = %s", genotype)
 
-            train_acc, train_loss = train_one_epoch(
-                train_queue, valid_queue, model, architect, criterion, optimizer, lr, epoch
-            )
-            logging.info("train_acc %f", train_acc)
-            logger.log_metric("search/train accuracy", train_acc/100, epoch, "search epoch")
-            logger.log_metric("search/train loss", train_loss, epoch, "search epoch")
-
-            valid_acc, valid_loss = infer(valid_queue, model, criterion)
-            logging.info("valid_acc %f", valid_acc)
-            logger.log_metric("search/val accuracy", valid_acc/100, epoch, "search epoch")
-            logger.log_metric("search/val loss", valid_loss, epoch, "search epoch")
-
-            test_acc, test_loss = infer(test_queue, model, criterion)
-            logging.info("test_acc %f", test_acc)
-            logger.log_metric("search/test accuracy", test_acc/100, epoch, "search epoch")
-            logger.log_metric("search/test loss", test_loss, epoch, "search epoch")
-
-            utils.save(model, os.path.join(args.save, "weights.pt"))
-            logger.log_pytorch_model(model, f"PC-DARTS_{args.dataset}", x=None, path=args.tmpdir, run_id=False)
-
-        # ── post-search ────────────────────────────────────────────────────
-        genotype = model.genotype()
-        logging.info("Final genotype = %s", genotype)
-
-        del model, architect, optimizer, scheduler
-        torch.cuda.empty_cache()
+            del model, architect, optimizer, scheduler
+            torch.cuda.empty_cache()
 
         if not args.skip_eval:
+            eval_resume_ckpt = resume_ckpt if resume_ckpt is not None and resume_ckpt["phase"] == "eval" else None
             _run_eval_phase(
                 genotype, n_classes, in_channels, train_data, test_queue,
-                criterion, logger,
+                criterion, logger, checkpoint_path=eval_ckpt_path, resume_ckpt=eval_resume_ckpt,
             )
 
 
@@ -492,7 +570,8 @@ def infer_eval(queue, model, criterion):
     return top1.avg, objs.avg
 
 
-def _run_eval_phase(genotype, n_classes, in_channels, train_data, test_queue, criterion, logger):
+def _run_eval_phase(genotype, n_classes, in_channels, train_data, test_queue, criterion, logger,
+                     checkpoint_path=None, resume_ckpt=None):
     """
     Build a fresh NetworkCIFAR from the found genotype, train it for
     args.eval_epochs, then evaluate on the test set.
@@ -534,7 +613,13 @@ def _run_eval_phase(genotype, n_classes, in_channels, train_data, test_queue, cr
         eval_optimizer, args.eval_epochs, eta_min=0.0
     )
 
-    for eval_epoch in range(args.eval_epochs):
+    start_epoch = 0
+    if resume_ckpt is not None:
+        _load_eval_checkpoint(resume_ckpt, eval_model, eval_optimizer, eval_scheduler)
+        start_epoch = resume_ckpt["epoch"]
+        logging.info("Resumed eval phase from epoch %d", start_epoch)
+
+    for eval_epoch in range(start_epoch, args.eval_epochs):
         eval_model.drop_path_prob = args.drop_path_prob * eval_epoch / args.eval_epochs
         train_acc, train_loss = train_eval_epoch(full_train_queue, eval_model, criterion, eval_optimizer)
         eval_scheduler.step()
@@ -549,6 +634,9 @@ def _run_eval_phase(genotype, n_classes, in_channels, train_data, test_queue, cr
         logging.info("eval test_acc=%.2f  test_loss=%.4f", test_acc, test_loss)
         logger.log_metric("training/test accuracy", test_acc / 100, eval_epoch, "epoch")
         logger.log_metric("training/test loss", test_loss, eval_epoch, "epoch")
+
+        if checkpoint_path is not None:
+            _save_eval_checkpoint(checkpoint_path, eval_epoch + 1, genotype, eval_model, eval_optimizer, eval_scheduler)
     logger.log_pytorch_model(eval_model, f"PC-DARTS_{args.dataset}_eval", x=None, path=args.tmpdir, run_id=False)
 
 

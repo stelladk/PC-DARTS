@@ -1,0 +1,467 @@
+Array task : sleeping -5s before starting
+sleep: invalid option -- '5'
+Try 'sleep --help' for more information.
+CUDA_VISIBLE_DEVICES=0
+Thu Apr  2 09:11:12 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 590.48.01              Driver Version: 590.48.01      CUDA Version: 13.1     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 2080 Ti     On  |   00000000:D9:00.0 Off |                  N/A |
+|  0%   28C    P8             20W /  250W |       1MiB /  11264MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+JOB ID = 55780
+NODE NAME = margpu020
+DATASET = multnist
+Experiment dir : /scratch/sdouka/tmp/PC-DARTS/search-EXP-20260402-091116
+04/02 09:11:17 AM gpu device = 0
+04/02 09:11:17 AM args = Namespace(data='/scratch/sdouka/data', dataset='multnist', image_size=None, num_classes=None, dataset_mean=None, dataset_std=None, grayscale=False, no_logger=False, api='wandb', exp_name='Budget', port=27028, log_path='/scratch/sdouka', tmpdir='/scratch/sdouka/tmp/', npyweb_url=None, npyweb_name='', npyweb_root='data/webdatasets/npy', npyweb_data_key='_x', npyweb_label_key='_y', npyweb_preload=True, batch_size=128, learning_rate=0.1, learning_rate_min=0.0, momentum=0.9, weight_decay=0.0003, report_freq=50, epochs=50, train_portion=0.5, unrolled=False, grad_clip=5, gpu=0, init_channels=16, layers=8, cutout=False, cutout_length=16, no_augment=False, drop_path_prob=0.3, arch_learning_rate=0.0006, arch_weight_decay=0.001, arch_warmup_epochs=15, save='/scratch/sdouka/tmp/PC-DARTS/search-EXP-20260402-091116', seed=2, skip_eval=False, eval_epochs=200, eval_init_channels=36, eval_layers=20, eval_batch_size=128, eval_learning_rate=0.025, auxiliary=False, auxiliary_weight=0.4)
+04/02 09:11:17 AM Dataset=multnist  classes=10  in_channels=3
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from /home/tau/sdouka/.netrc.
+wandb: Currently logged in as: stella_douka (stella_douka-personal) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.25.1
+wandb: Run data is saved locally in /scratch/sdouka/wandb/run-20260402_091119-bwygdbxf
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run different-thunder-22
+wandb: ⭐️ View project at https://wandb.ai/stella_douka-personal/Budget
+wandb: 🚀 View run at https://wandb.ai/stella_douka-personal/Budget/runs/bwygdbxf
+04/02 09:11:21 AM param size = 0.30 MB
+/scratch/sdouka/conda/envs/gromo/lib/python3.11/site-packages/torch/optim/lr_scheduler.py:182: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+04/02 09:11:21 AM epoch 0  lr 9.990134e-02
+04/02 09:11:21 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:11:23 AM train 000  loss=2.3037  top1=11.72  top5=51.56
+04/02 09:11:56 AM train 050  loss=2.1519  top1=17.49  top5=69.90
+04/02 09:12:28 AM train 100  loss=2.0256  top1=20.92  top5=76.60
+04/02 09:13:01 AM train 150  loss=1.9092  top1=24.04  top5=80.70
+04/02 09:13:34 AM train 200  loss=1.8445  top1=25.61  top5=82.97
+04/02 09:13:56 AM train_acc 26.373333
+04/02 09:13:57 AM valid 000  loss=2.0125  top1=22.66  top5=88.28
+04/02 09:14:09 AM valid 050  loss=1.8491  top1=27.88  top5=84.59
+04/02 09:14:22 AM valid 100  loss=1.8548  top1=27.06  top5=84.70
+04/02 09:14:35 AM valid 150  loss=1.8478  top1=27.20  top5=84.78
+04/02 09:14:48 AM valid 200  loss=1.8470  top1=27.23  top5=84.77
+04/02 09:14:56 AM valid_acc 27.286667
+04/02 09:14:58 AM epoch 1  lr 9.960574e-02
+04/02 09:14:58 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:14:59 AM train 000  loss=1.6561  top1=33.59  top5=90.62
+04/02 09:15:32 AM train 050  loss=1.5634  top1=32.17  top5=91.96
+04/02 09:16:06 AM train 100  loss=1.5644  top1=32.50  top5=91.62
+04/02 09:16:38 AM train 150  loss=1.5470  top1=32.62  top5=92.19
+04/02 09:17:11 AM train 200  loss=1.5363  top1=32.76  top5=92.49
+04/02 09:17:33 AM train_acc 33.016667
+04/02 09:17:34 AM valid 000  loss=2.0316  top1=25.00  top5=85.16
+04/02 09:17:47 AM valid 050  loss=1.8792  top1=27.74  top5=86.47
+04/02 09:18:00 AM valid 100  loss=1.8812  top1=27.99  top5=86.02
+04/02 09:18:13 AM valid 150  loss=1.8752  top1=27.99  top5=86.12
+04/02 09:18:26 AM valid 200  loss=1.8765  top1=27.92  top5=86.01
+04/02 09:18:34 AM valid_acc 27.906667
+04/02 09:18:35 AM epoch 2  lr 9.911436e-02
+04/02 09:18:35 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:18:36 AM train 000  loss=1.4534  top1=27.34  top5=96.88
+04/02 09:19:09 AM train 050  loss=1.4517  top1=34.13  top5=94.41
+04/02 09:19:46 AM train 100  loss=1.4637  top1=33.98  top5=94.18
+04/02 09:20:19 AM train 150  loss=1.4610  top1=34.35  top5=94.16
+04/02 09:20:52 AM train 200  loss=1.4577  top1=34.57  top5=94.22
+04/02 09:21:14 AM train_acc 34.593333
+04/02 09:21:15 AM valid 000  loss=1.7787  top1=33.59  top5=89.06
+04/02 09:21:28 AM valid 050  loss=1.7753  top1=31.08  top5=91.13
+04/02 09:21:41 AM valid 100  loss=1.7722  top1=31.02  top5=91.22
+04/02 09:21:54 AM valid 150  loss=1.7649  top1=31.04  top5=91.39
+04/02 09:22:07 AM valid 200  loss=1.7601  top1=31.12  top5=91.57
+04/02 09:22:15 AM valid_acc 31.216667
+04/02 09:22:16 AM epoch 3  lr 9.842916e-02
+04/02 09:22:16 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:22:18 AM train 000  loss=1.4787  top1=32.81  top5=93.75
+04/02 09:22:51 AM train 050  loss=1.4412  top1=35.57  top5=94.52
+04/02 09:23:23 AM train 100  loss=1.4266  top1=35.67  top5=94.88
+04/02 09:23:56 AM train 150  loss=1.4211  top1=35.37  top5=95.00
+04/02 09:24:29 AM train 200  loss=1.4123  top1=35.56  top5=95.15
+04/02 09:24:51 AM train_acc 35.493333
+04/02 09:24:51 AM valid 000  loss=1.4574  top1=39.84  top5=94.53
+04/02 09:25:04 AM valid 050  loss=1.4818  top1=34.36  top5=94.33
+04/02 09:25:17 AM valid 100  loss=1.4764  top1=34.62  top5=94.52
+04/02 09:25:30 AM valid 150  loss=1.4790  top1=34.30  top5=94.54
+04/02 09:25:43 AM valid 200  loss=1.4768  top1=34.32  top5=94.55
+04/02 09:25:52 AM valid_acc 34.326667
+04/02 09:25:53 AM epoch 4  lr 9.755283e-02
+04/02 09:25:53 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:25:54 AM train 000  loss=1.3738  top1=36.72  top5=96.09
+04/02 09:26:27 AM train 050  loss=1.3897  top1=36.58  top5=95.66
+04/02 09:27:01 AM train 100  loss=1.3963  top1=36.90  top5=95.47
+04/02 09:27:35 AM train 150  loss=1.3835  top1=37.35  top5=95.77
+04/02 09:28:08 AM train 200  loss=1.3802  top1=37.51  top5=95.79
+04/02 09:28:30 AM train_acc 37.453333
+04/02 09:28:31 AM valid 000  loss=1.5925  top1=28.12  top5=89.06
+04/02 09:28:44 AM valid 050  loss=1.5391  top1=34.33  top5=92.34
+04/02 09:28:57 AM valid 100  loss=1.5315  top1=34.63  top5=92.40
+04/02 09:29:10 AM valid 150  loss=1.5283  top1=34.79  top5=92.39
+04/02 09:29:23 AM valid 200  loss=1.5263  top1=35.03  top5=92.28
+04/02 09:29:31 AM valid_acc 34.920000
+04/02 09:29:32 AM epoch 5  lr 9.648882e-02
+04/02 09:29:32 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:29:34 AM train 000  loss=1.2742  top1=40.62  top5=95.31
+04/02 09:30:07 AM train 050  loss=1.3732  top1=37.59  top5=95.86
+04/02 09:30:40 AM train 100  loss=1.3643  top1=38.37  top5=96.12
+04/02 09:31:13 AM train 150  loss=1.3607  top1=38.80  top5=96.04
+04/02 09:31:46 AM train 200  loss=1.3545  top1=39.31  top5=96.06
+04/02 09:32:08 AM train_acc 39.633333
+04/02 09:32:09 AM valid 000  loss=1.3240  top1=40.62  top5=97.66
+04/02 09:32:22 AM valid 050  loss=1.3951  top1=38.97  top5=96.12
+04/02 09:32:35 AM valid 100  loss=1.3979  top1=39.29  top5=95.88
+04/02 09:32:48 AM valid 150  loss=1.4001  top1=39.55  top5=95.79
+04/02 09:33:01 AM valid 200  loss=1.3973  top1=39.72  top5=95.80
+04/02 09:33:09 AM valid_acc 39.476667
+04/02 09:33:10 AM epoch 6  lr 9.524135e-02
+04/02 09:33:10 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:33:11 AM train 000  loss=1.3908  top1=42.19  top5=96.09
+04/02 09:33:45 AM train 050  loss=1.2981  top1=42.85  top5=96.86
+04/02 09:34:18 AM train 100  loss=1.2988  top1=43.14  top5=96.71
+04/02 09:34:51 AM train 150  loss=1.2883  top1=44.10  top5=96.72
+04/02 09:35:25 AM train 200  loss=1.2809  top1=44.95  top5=96.66
+04/02 09:35:47 AM train_acc 45.260000
+04/02 09:35:48 AM valid 000  loss=1.5021  top1=45.31  top5=94.53
+04/02 09:36:01 AM valid 050  loss=1.5229  top1=41.87  top5=92.82
+04/02 09:36:14 AM valid 100  loss=1.5167  top1=41.96  top5=92.81
+04/02 09:36:27 AM valid 150  loss=1.5199  top1=41.94  top5=92.81
+04/02 09:36:40 AM valid 200  loss=1.5212  top1=42.00  top5=92.90
+04/02 09:36:48 AM valid_acc 41.856667
+04/02 09:36:49 AM epoch 7  lr 9.381533e-02
+04/02 09:36:49 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:36:51 AM train 000  loss=1.2607  top1=44.53  top5=96.88
+04/02 09:37:24 AM train 050  loss=1.1876  top1=49.79  top5=97.20
+04/02 09:37:57 AM train 100  loss=1.1777  top1=50.94  top5=97.17
+04/02 09:38:30 AM train 150  loss=1.1718  top1=51.08  top5=97.13
+04/02 09:39:03 AM train 200  loss=1.1600  top1=51.79  top5=97.26
+04/02 09:39:25 AM train_acc 52.093333
+04/02 09:39:26 AM valid 000  loss=1.3519  top1=42.97  top5=96.88
+04/02 09:39:39 AM valid 050  loss=1.3472  top1=46.72  top5=95.56
+04/02 09:39:52 AM valid 100  loss=1.3608  top1=46.29  top5=95.31
+04/02 09:40:05 AM valid 150  loss=1.3670  top1=46.13  top5=95.23
+04/02 09:40:18 AM valid 200  loss=1.3600  top1=46.28  top5=95.35
+04/02 09:40:26 AM valid_acc 46.243333
+04/02 09:40:27 AM epoch 8  lr 9.221640e-02
+04/02 09:40:27 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:40:28 AM train 000  loss=1.1323  top1=45.31  top5=99.22
+04/02 09:41:02 AM train 050  loss=1.0811  top1=56.56  top5=97.56
+04/02 09:41:35 AM train 100  loss=1.0686  top1=57.25  top5=97.41
+04/02 09:42:09 AM train 150  loss=1.0533  top1=58.14  top5=97.52
+04/02 09:42:42 AM train 200  loss=1.0421  top1=58.59  top5=97.65
+04/02 09:43:04 AM train_acc 59.050000
+04/02 09:43:05 AM valid 000  loss=1.3552  top1=46.88  top5=95.31
+04/02 09:43:19 AM valid 050  loss=1.2898  top1=53.43  top5=94.35
+04/02 09:43:32 AM valid 100  loss=1.3004  top1=52.64  top5=94.22
+04/02 09:43:45 AM valid 150  loss=1.2865  top1=53.43  top5=94.39
+04/02 09:43:58 AM valid 200  loss=1.2831  top1=53.43  top5=94.43
+04/02 09:44:07 AM valid_acc 53.346667
+04/02 09:44:08 AM epoch 9  lr 9.045085e-02
+04/02 09:44:08 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:44:10 AM train 000  loss=0.9658  top1=61.72  top5=96.09
+04/02 09:44:43 AM train 050  loss=0.9470  top1=63.37  top5=97.92
+04/02 09:45:16 AM train 100  loss=0.9431  top1=63.92  top5=98.02
+04/02 09:45:48 AM train 150  loss=0.9257  top1=64.75  top5=98.19
+04/02 09:46:22 AM train 200  loss=0.9195  top1=65.21  top5=98.19
+04/02 09:46:44 AM train_acc 65.460000
+04/02 09:46:45 AM valid 000  loss=1.2576  top1=59.38  top5=96.88
+04/02 09:46:58 AM valid 050  loss=1.1387  top1=60.11  top5=96.84
+04/02 09:47:11 AM valid 100  loss=1.1375  top1=60.41  top5=96.91
+04/02 09:47:24 AM valid 150  loss=1.1372  top1=60.80  top5=96.92
+04/02 09:47:37 AM valid 200  loss=1.1304  top1=60.88  top5=96.91
+04/02 09:47:45 AM valid_acc 60.806667
+04/02 09:47:46 AM epoch 10  lr 8.852566e-02
+04/02 09:47:46 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:47:47 AM train 000  loss=0.7565  top1=69.53  top5=99.22
+04/02 09:48:21 AM train 050  loss=0.8764  top1=67.92  top5=98.21
+04/02 09:48:54 AM train 100  loss=0.8473  top1=69.47  top5=98.31
+04/02 09:49:27 AM train 150  loss=0.8323  top1=69.89  top5=98.43
+04/02 09:50:00 AM train 200  loss=0.8243  top1=70.36  top5=98.46
+04/02 09:50:22 AM train_acc 70.600000
+04/02 09:50:23 AM valid 000  loss=1.3175  top1=59.38  top5=95.31
+04/02 09:50:36 AM valid 050  loss=1.1362  top1=59.96  top5=97.17
+04/02 09:50:50 AM valid 100  loss=1.1441  top1=60.02  top5=97.25
+04/02 09:51:03 AM valid 150  loss=1.1492  top1=60.11  top5=97.21
+04/02 09:51:16 AM valid 200  loss=1.1408  top1=60.52  top5=97.18
+04/02 09:51:25 AM valid_acc 60.476667
+04/02 09:51:26 AM epoch 11  lr 8.644843e-02
+04/02 09:51:26 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:51:27 AM train 000  loss=0.5332  top1=82.81  top5=100.00
+04/02 09:52:00 AM train 050  loss=0.7411  top1=73.56  top5=98.84
+04/02 09:52:33 AM train 100  loss=0.7335  top1=73.92  top5=98.76
+04/02 09:53:06 AM train 150  loss=0.7331  top1=74.22  top5=98.73
+04/02 09:53:39 AM train 200  loss=0.7315  top1=74.14  top5=98.80
+04/02 09:54:01 AM train_acc 74.370000
+04/02 09:54:02 AM valid 000  loss=0.5919  top1=78.12  top5=100.00
+04/02 09:54:15 AM valid 050  loss=0.7943  top1=71.69  top5=98.68
+04/02 09:54:28 AM valid 100  loss=0.7944  top1=71.63  top5=98.66
+04/02 09:54:41 AM valid 150  loss=0.7872  top1=71.82  top5=98.67
+04/02 09:54:54 AM valid 200  loss=0.7873  top1=71.95  top5=98.62
+04/02 09:55:03 AM valid_acc 72.003333
+04/02 09:55:03 AM epoch 12  lr 8.422736e-02
+04/02 09:55:03 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:55:05 AM train 000  loss=0.6724  top1=78.91  top5=98.44
+04/02 09:55:38 AM train 050  loss=0.6637  top1=76.98  top5=99.02
+04/02 09:56:11 AM train 100  loss=0.6626  top1=77.02  top5=99.01
+04/02 09:56:44 AM train 150  loss=0.6614  top1=77.05  top5=99.01
+04/02 09:57:19 AM train 200  loss=0.6631  top1=77.13  top5=98.97
+04/02 09:57:41 AM train_acc 77.273333
+04/02 09:57:42 AM valid 000  loss=1.0058  top1=61.72  top5=96.88
+04/02 09:57:55 AM valid 050  loss=1.1501  top1=60.98  top5=96.42
+04/02 09:58:08 AM valid 100  loss=1.1367  top1=61.08  top5=96.67
+04/02 09:58:22 AM valid 150  loss=1.1407  top1=60.92  top5=96.76
+04/02 09:58:35 AM valid 200  loss=1.1435  top1=60.98  top5=96.73
+04/02 09:58:43 AM valid_acc 60.916667
+04/02 09:58:44 AM epoch 13  lr 8.187120e-02
+04/02 09:58:44 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 09:58:46 AM train 000  loss=0.5842  top1=78.91  top5=100.00
+04/02 09:59:19 AM train 050  loss=0.6251  top1=78.45  top5=99.16
+04/02 09:59:52 AM train 100  loss=0.6220  top1=78.77  top5=99.09
+04/02 10:00:25 AM train 150  loss=0.6163  top1=78.93  top5=99.03
+04/02 10:00:58 AM train 200  loss=0.6165  top1=78.93  top5=99.04
+04/02 10:01:20 AM train_acc 79.133333
+04/02 10:01:21 AM valid 000  loss=0.9040  top1=68.75  top5=100.00
+04/02 10:01:34 AM valid 050  loss=0.8207  top1=71.26  top5=98.54
+04/02 10:01:47 AM valid 100  loss=0.8278  top1=71.21  top5=98.50
+04/02 10:02:00 AM valid 150  loss=0.8265  top1=71.27  top5=98.53
+04/02 10:02:13 AM valid 200  loss=0.8253  top1=71.40  top5=98.52
+04/02 10:02:21 AM valid_acc 71.273333
+04/02 10:02:22 AM epoch 14  lr 7.938926e-02
+04/02 10:02:22 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 10:02:23 AM train 000  loss=0.5718  top1=81.25  top5=100.00
+04/02 10:02:57 AM train 050  loss=0.5405  top1=81.34  top5=99.26
+04/02 10:03:30 AM train 100  loss=0.5502  top1=81.06  top5=99.26
+04/02 10:04:03 AM train 150  loss=0.5591  top1=80.91  top5=99.17
+04/02 10:04:36 AM train 200  loss=0.5613  top1=80.86  top5=99.14
+04/02 10:04:58 AM train_acc 81.006667
+04/02 10:04:59 AM valid 000  loss=0.6036  top1=80.47  top5=100.00
+04/02 10:05:12 AM valid 050  loss=0.7760  top1=74.54  top5=98.41
+04/02 10:05:25 AM valid 100  loss=0.7824  top1=74.03  top5=98.45
+04/02 10:05:38 AM valid 150  loss=0.7926  top1=73.74  top5=98.46
+04/02 10:05:52 AM valid 200  loss=0.7904  top1=73.92  top5=98.41
+04/02 10:06:00 AM valid_acc 73.856667
+04/02 10:06:01 AM epoch 15  lr 7.679134e-02
+04/02 10:06:02 AM genotype = Genotype(normal=[('dil_conv_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 2), ('avg_pool_3x3', 1), ('sep_conv_5x5', 1), ('dil_conv_5x5', 3), ('sep_conv_3x3', 4), ('avg_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 2), ('avg_pool_3x3', 1), ('sep_conv_3x3', 0), ('avg_pool_3x3', 2), ('max_pool_3x3', 4), ('sep_conv_3x3', 0)], reduce_concat=range(2, 6))
+04/02 10:06:04 AM train 000  loss=0.5059  top1=84.38  top5=100.00
+04/02 10:07:33 AM train 050  loss=0.5217  top1=82.77  top5=99.28
+04/02 10:09:02 AM train 100  loss=0.5387  top1=81.98  top5=99.14
+04/02 10:10:31 AM train 150  loss=0.5344  top1=81.92  top5=99.25
+04/02 10:12:00 AM train 200  loss=0.5371  top1=81.71  top5=99.21
+04/02 10:13:01 AM train_acc 81.863333
+04/02 10:13:01 AM valid 000  loss=0.5386  top1=82.81  top5=99.22
+04/02 10:13:15 AM valid 050  loss=0.6716  top1=77.62  top5=98.84
+04/02 10:13:28 AM valid 100  loss=0.6857  top1=77.00  top5=98.82
+04/02 10:13:41 AM valid 150  loss=0.6814  top1=77.20  top5=98.84
+04/02 10:13:53 AM valid 200  loss=0.6784  top1=77.24  top5=98.89
+04/02 10:14:02 AM valid_acc 77.190000
+04/02 10:14:03 AM epoch 16  lr 7.408768e-02
+04/02 10:14:03 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 2), ('sep_conv_5x5', 0), ('sep_conv_5x5', 3), ('sep_conv_5x5', 2), ('sep_conv_3x3', 4), ('sep_conv_5x5', 1)], normal_concat=range(2, 6), reduce=[('sep_conv_3x3', 1), ('dil_conv_5x5', 0), ('max_pool_3x3', 1), ('sep_conv_3x3', 2), ('max_pool_3x3', 3), ('max_pool_3x3', 2), ('sep_conv_3x3', 4), ('max_pool_3x3', 2)], reduce_concat=range(2, 6))
+04/02 10:14:05 AM train 000  loss=0.4682  top1=82.81  top5=99.22
+04/02 10:15:36 AM train 050  loss=0.4912  top1=83.27  top5=99.43
+04/02 10:17:06 AM train 100  loss=0.4946  top1=83.35  top5=99.37
+04/02 10:18:38 AM train 150  loss=0.5042  top1=83.05  top5=99.32
+04/02 10:20:07 AM train 200  loss=0.5061  top1=82.82  top5=99.31
+04/02 10:21:08 AM train_acc 82.746667
+04/02 10:21:09 AM valid 000  loss=0.4081  top1=85.94  top5=100.00
+04/02 10:21:22 AM valid 050  loss=0.5471  top1=81.68  top5=99.10
+04/02 10:21:35 AM valid 100  loss=0.5414  top1=81.94  top5=99.15
+04/02 10:21:48 AM valid 150  loss=0.5423  top1=81.84  top5=99.16
+04/02 10:22:01 AM valid 200  loss=0.5405  top1=81.97  top5=99.17
+04/02 10:22:10 AM valid_acc 81.960000
+04/02 10:22:10 AM epoch 17  lr 7.128896e-02
+04/02 10:22:10 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 2), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('sep_conv_5x5', 3), ('dil_conv_3x3', 4), ('sep_conv_5x5', 1)], normal_concat=range(2, 6), reduce=[('sep_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_3x3', 2), ('max_pool_3x3', 1), ('max_pool_3x3', 3), ('max_pool_3x3', 2), ('sep_conv_3x3', 4), ('max_pool_3x3', 3)], reduce_concat=range(2, 6))
+04/02 10:22:13 AM train 000  loss=0.3254  top1=92.19  top5=100.00
+04/02 10:23:42 AM train 050  loss=0.4543  top1=84.68  top5=99.45
+04/02 10:25:11 AM train 100  loss=0.4609  top1=84.55  top5=99.40
+04/02 10:26:41 AM train 150  loss=0.4677  top1=84.23  top5=99.42
+04/02 10:28:10 AM train 200  loss=0.4737  top1=83.99  top5=99.39
+04/02 10:29:11 AM train_acc 84.010000
+04/02 10:29:12 AM valid 000  loss=0.5319  top1=84.38  top5=99.22
+04/02 10:29:25 AM valid 050  loss=0.5359  top1=81.97  top5=99.31
+04/02 10:29:39 AM valid 100  loss=0.5376  top1=81.85  top5=99.23
+04/02 10:29:52 AM valid 150  loss=0.5430  top1=81.63  top5=99.26
+04/02 10:30:05 AM valid 200  loss=0.5472  top1=81.50  top5=99.28
+04/02 10:30:13 AM valid_acc 81.600000
+04/02 10:30:14 AM epoch 18  lr 6.840623e-02
+04/02 10:30:14 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('sep_conv_5x5', 2), ('sep_conv_3x3', 3), ('dil_conv_3x3', 4), ('sep_conv_5x5', 0)], normal_concat=range(2, 6), reduce=[('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('max_pool_3x3', 1), ('max_pool_3x3', 3), ('max_pool_3x3', 2), ('sep_conv_5x5', 4), ('dil_conv_3x3', 3)], reduce_concat=range(2, 6))
+04/02 10:30:17 AM train 000  loss=0.5461  top1=81.25  top5=100.00
+04/02 10:31:47 AM train 050  loss=0.4345  top1=85.43  top5=99.46
+04/02 10:33:17 AM train 100  loss=0.4449  top1=85.22  top5=99.47
+04/02 10:34:46 AM train 150  loss=0.4421  top1=85.28  top5=99.47
+04/02 10:36:16 AM train 200  loss=0.4386  top1=85.38  top5=99.48
+04/02 10:37:17 AM train_acc 85.210000
+04/02 10:37:17 AM valid 000  loss=0.9841  top1=67.97  top5=99.22
+04/02 10:37:30 AM valid 050  loss=0.7114  top1=76.69  top5=99.07
+04/02 10:37:43 AM valid 100  loss=0.6955  top1=77.14  top5=99.04
+04/02 10:37:56 AM valid 150  loss=0.7019  top1=76.90  top5=98.95
+04/02 10:38:09 AM valid 200  loss=0.7037  top1=76.88  top5=98.99
+04/02 10:38:18 AM valid_acc 76.700000
+04/02 10:38:19 AM epoch 19  lr 6.545085e-02
+04/02 10:38:19 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 2), ('sep_conv_5x5', 0), ('sep_conv_3x3', 3), ('sep_conv_5x5', 2), ('dil_conv_3x3', 4), ('sep_conv_5x5', 0)], normal_concat=range(2, 6), reduce=[('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('max_pool_3x3', 1), ('max_pool_3x3', 3), ('max_pool_3x3', 2), ('sep_conv_5x5', 4), ('max_pool_3x3', 3)], reduce_concat=range(2, 6))
+04/02 10:38:21 AM train 000  loss=0.3916  top1=87.50  top5=100.00
+04/02 10:39:50 AM train 050  loss=0.4125  top1=85.92  top5=99.59
+04/02 10:41:21 AM train 100  loss=0.4176  top1=85.88  top5=99.57
+04/02 10:42:50 AM train 150  loss=0.4268  top1=85.60  top5=99.57
+04/02 10:44:20 AM train 200  loss=0.4299  top1=85.54  top5=99.56
+04/02 10:45:20 AM train_acc 85.540000
+04/02 10:45:21 AM valid 000  loss=0.6399  top1=77.34  top5=99.22
+04/02 10:45:35 AM valid 050  loss=0.5357  top1=82.28  top5=99.10
+04/02 10:45:48 AM valid 100  loss=0.5476  top1=82.05  top5=99.03
+04/02 10:46:01 AM valid 150  loss=0.5427  top1=82.25  top5=99.05
+04/02 10:46:13 AM valid 200  loss=0.5445  top1=82.28  top5=99.00
+04/02 10:46:22 AM valid_acc 82.316667
+04/02 10:46:23 AM epoch 20  lr 6.243449e-02
+04/02 10:46:23 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('sep_conv_3x3', 3), ('sep_conv_5x5', 2), ('dil_conv_3x3', 4), ('sep_conv_5x5', 0)], normal_concat=range(2, 6), reduce=[('max_pool_3x3', 1), ('sep_conv_5x5', 0), ('sep_conv_3x3', 2), ('max_pool_3x3', 1), ('max_pool_3x3', 3), ('max_pool_3x3', 2), ('sep_conv_5x5', 4), ('dil_conv_3x3', 3)], reduce_concat=range(2, 6))
+04/02 10:46:25 AM train 000  loss=0.4404  top1=89.06  top5=98.44
+04/02 10:47:55 AM train 050  loss=0.4039  top1=86.58  top5=99.59
+04/02 10:49:26 AM train 100  loss=0.3991  top1=86.68  top5=99.61
+04/02 10:50:55 AM train 150  loss=0.4046  top1=86.33  top5=99.62
+04/02 10:52:24 AM train 200  loss=0.4024  top1=86.33  top5=99.62
+04/02 10:53:25 AM train_acc 86.286667
+04/02 10:53:26 AM valid 000  loss=0.5661  top1=82.03  top5=99.22
+04/02 10:53:39 AM valid 050  loss=0.4992  top1=83.79  top5=99.19
+04/02 10:53:52 AM valid 100  loss=0.4961  top1=83.86  top5=99.15
+04/02 10:54:05 AM valid 150  loss=0.5005  top1=83.67  top5=99.21
+04/02 10:54:18 AM valid 200  loss=0.5070  top1=83.52  top5=99.20
+04/02 10:54:26 AM valid_acc 83.610000
+04/02 10:54:27 AM epoch 21  lr 5.936907e-02
+04/02 10:54:27 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('sep_conv_5x5', 2), ('sep_conv_3x3', 3), ('dil_conv_3x3', 4), ('sep_conv_5x5', 0)], normal_concat=range(2, 6), reduce=[('max_pool_3x3', 1), ('sep_conv_5x5', 0), ('sep_conv_3x3', 2), ('max_pool_3x3', 1), ('max_pool_3x3', 3), ('sep_conv_3x3', 2), ('sep_conv_5x5', 4), ('max_pool_3x3', 3)], reduce_concat=range(2, 6))
+04/02 10:54:29 AM train 000  loss=0.3333  top1=89.84  top5=99.22
+04/02 10:55:58 AM train 050  loss=0.3795  top1=87.41  top5=99.48
+04/02 10:57:27 AM train 100  loss=0.3796  top1=87.32  top5=99.50
+04/02 10:58:55 AM train 150  loss=0.3800  top1=87.29  top5=99.59
+04/02 11:00:24 AM train 200  loss=0.3837  top1=87.15  top5=99.57
+04/02 11:01:24 AM train_acc 86.976667
+04/02 11:01:25 AM valid 000  loss=0.5814  top1=78.12  top5=100.00
+04/02 11:01:38 AM valid 050  loss=0.5481  top1=81.77  top5=99.42
+04/02 11:01:50 AM valid 100  loss=0.5498  top1=81.43  top5=99.33
+04/02 11:02:03 AM valid 150  loss=0.5618  top1=80.93  top5=99.29
+04/02 11:02:16 AM valid 200  loss=0.5597  top1=81.18  top5=99.29
+04/02 11:02:25 AM valid_acc 81.213333
+04/02 11:02:26 AM epoch 22  lr 5.626666e-02
+04/02 11:02:26 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('sep_conv_5x5', 2), ('sep_conv_5x5', 1), ('dil_conv_3x3', 4), ('sep_conv_5x5', 0)], normal_concat=range(2, 6), reduce=[('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_3x3', 2), ('max_pool_3x3', 1), ('max_pool_3x3', 3), ('sep_conv_3x3', 2), ('sep_conv_5x5', 4), ('max_pool_3x3', 3)], reduce_concat=range(2, 6))
+04/02 11:02:28 AM train 000  loss=0.4784  top1=82.81  top5=100.00
+04/02 11:03:57 AM train 050  loss=0.3830  top1=86.73  top5=99.75
+04/02 11:05:27 AM train 100  loss=0.3740  top1=87.24  top5=99.70
+04/02 11:06:55 AM train 150  loss=0.3787  top1=87.12  top5=99.67
+04/02 11:08:24 AM train 200  loss=0.3796  top1=87.20  top5=99.61
+04/02 11:09:24 AM train_acc 87.283333
+04/02 11:09:25 AM valid 000  loss=0.3203  top1=87.50  top5=99.22
+04/02 11:09:38 AM valid 050  loss=0.4643  top1=84.77  top5=99.22
+04/02 11:09:51 AM valid 100  loss=0.4698  top1=84.83  top5=99.26
+04/02 11:10:04 AM valid 150  loss=0.4701  top1=84.93  top5=99.30
+04/02 11:10:16 AM valid 200  loss=0.4710  top1=84.83  top5=99.32
+04/02 11:10:25 AM valid_acc 84.800000
+04/02 11:10:26 AM epoch 23  lr 5.313953e-02
+04/02 11:10:26 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('sep_conv_5x5', 2), ('sep_conv_3x3', 3), ('dil_conv_3x3', 4), ('sep_conv_5x5', 0)], normal_concat=range(2, 6), reduce=[('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('max_pool_3x3', 1), ('max_pool_3x3', 3), ('sep_conv_3x3', 2), ('sep_conv_5x5', 4), ('max_pool_3x3', 3)], reduce_concat=range(2, 6))
+04/02 11:10:28 AM train 000  loss=0.5349  top1=85.94  top5=100.00
+04/02 11:11:57 AM train 050  loss=0.3583  top1=88.14  top5=99.75
+04/02 11:13:25 AM train 100  loss=0.3454  top1=88.52  top5=99.78
+04/02 11:14:53 AM train 150  loss=0.3409  top1=88.59  top5=99.72
+04/02 11:16:23 AM train 200  loss=0.3495  top1=88.34  top5=99.71
+04/02 11:17:23 AM train_acc 88.253333
+04/02 11:17:24 AM valid 000  loss=0.4610  top1=83.59  top5=100.00
+04/02 11:17:37 AM valid 050  loss=0.4963  top1=84.19  top5=99.26
+04/02 11:17:50 AM valid 100  loss=0.4911  top1=84.20  top5=99.34
+04/02 11:18:03 AM valid 150  loss=0.4807  top1=84.42  top5=99.34
+04/02 11:18:15 AM valid 200  loss=0.4797  top1=84.40  top5=99.34
+04/02 11:18:24 AM valid_acc 84.406667
+04/02 11:18:25 AM epoch 24  lr 5.000000e-02
+04/02 11:18:25 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('sep_conv_5x5', 2), ('sep_conv_5x5', 1), ('dil_conv_3x3', 4), ('sep_conv_5x5', 0)], normal_concat=range(2, 6), reduce=[('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_3x3', 2), ('max_pool_3x3', 1), ('max_pool_3x3', 3), ('max_pool_3x3', 2), ('sep_conv_5x5', 4), ('max_pool_3x3', 3)], reduce_concat=range(2, 6))
+04/02 11:18:27 AM train 000  loss=0.2956  top1=86.72  top5=100.00
+04/02 11:19:56 AM train 050  loss=0.3341  top1=89.05  top5=99.74
+04/02 11:21:24 AM train 100  loss=0.3282  top1=89.16  top5=99.77
+04/02 11:22:53 AM train 150  loss=0.3313  top1=89.04  top5=99.72
+04/02 11:24:22 AM train 200  loss=0.3358  top1=88.89  top5=99.67
+04/02 11:25:22 AM train_acc 88.746667
+04/02 11:25:23 AM valid 000  loss=0.4228  top1=87.50  top5=99.22
+04/02 11:25:36 AM valid 050  loss=0.4460  top1=85.72  top5=99.46
+04/02 11:25:49 AM valid 100  loss=0.4448  top1=85.68  top5=99.38
+04/02 11:26:02 AM valid 150  loss=0.4474  top1=85.63  top5=99.38
+04/02 11:26:15 AM valid 200  loss=0.4457  top1=85.56  top5=99.39
+04/02 11:26:24 AM valid_acc 85.613333
+04/02 11:26:25 AM epoch 25  lr 4.686047e-02
+04/02 11:26:25 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('sep_conv_5x5', 2), ('sep_conv_5x5', 0), ('sep_conv_5x5', 0), ('dil_conv_3x3', 4)], normal_concat=range(2, 6), reduce=[('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_3x3', 2), ('max_pool_3x3', 1), ('max_pool_3x3', 3), ('sep_conv_3x3', 2), ('sep_conv_5x5', 4), ('max_pool_3x3', 3)], reduce_concat=range(2, 6))
+04/02 11:26:27 AM train 000  loss=0.3054  top1=87.50  top5=99.22
+04/02 11:27:56 AM train 050  loss=0.3049  top1=89.89  top5=99.72
+04/02 11:29:24 AM train 100  loss=0.3080  top1=89.60  top5=99.72
+04/02 11:30:52 AM train 150  loss=0.3171  top1=89.36  top5=99.69
+04/02 11:32:21 AM train 200  loss=0.3202  top1=89.31  top5=99.72
+04/02 11:33:21 AM train_acc 89.426667
+04/02 11:33:22 AM valid 000  loss=0.4932  top1=90.62  top5=98.44
+04/02 11:33:34 AM valid 050  loss=0.4104  top1=87.01  top5=99.46
+04/02 11:33:47 AM valid 100  loss=0.4037  top1=87.16  top5=99.43
+04/02 11:34:00 AM valid 150  loss=0.3937  top1=87.42  top5=99.44
+04/02 11:34:13 AM valid 200  loss=0.3938  top1=87.45  top5=99.47
+04/02 11:34:22 AM valid_acc 87.450000
+04/02 11:34:23 AM epoch 26  lr 4.373334e-02
+04/02 11:34:23 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('sep_conv_5x5', 2), ('sep_conv_5x5', 0), ('sep_conv_5x5', 0), ('dil_conv_3x3', 4)], normal_concat=range(2, 6), reduce=[('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_3x3', 2), ('max_pool_3x3', 1), ('max_pool_3x3', 3), ('sep_conv_3x3', 2), ('sep_conv_5x5', 4), ('max_pool_3x3', 3)], reduce_concat=range(2, 6))
+04/02 11:34:25 AM train 000  loss=0.2997  top1=89.84  top5=100.00
+04/02 11:35:54 AM train 050  loss=0.2649  top1=91.01  top5=99.82
+04/02 11:37:23 AM train 100  loss=0.2763  top1=90.77  top5=99.81
+04/02 11:38:52 AM train 150  loss=0.2892  top1=90.32  top5=99.80
+04/02 11:40:21 AM train 200  loss=0.2941  top1=90.31  top5=99.78
+04/02 11:41:21 AM train_acc 90.280000
+04/02 11:41:22 AM valid 000  loss=0.3885  top1=87.50  top5=100.00
+04/02 11:41:35 AM valid 050  loss=0.3983  top1=87.30  top5=99.43
+04/02 11:41:48 AM valid 100  loss=0.3965  top1=87.28  top5=99.49
+04/02 11:42:01 AM valid 150  loss=0.3970  top1=87.26  top5=99.46
+04/02 11:42:14 AM valid 200  loss=0.3969  top1=87.22  top5=99.46
+04/02 11:42:22 AM valid_acc 87.136667
+04/02 11:42:23 AM epoch 27  lr 4.063093e-02
+04/02 11:42:23 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('sep_conv_5x5', 2), ('sep_conv_5x5', 1), ('sep_conv_5x5', 0), ('dil_conv_3x3', 4)], normal_concat=range(2, 6), reduce=[('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_3x3', 2), ('max_pool_3x3', 1), ('max_pool_3x3', 3), ('dil_conv_3x3', 2), ('sep_conv_5x5', 4), ('dil_conv_3x3', 3)], reduce_concat=range(2, 6))
+04/02 11:42:25 AM train 000  loss=0.3070  top1=86.72  top5=100.00
+04/02 11:43:54 AM train 050  loss=0.2783  top1=90.59  top5=99.89
+04/02 11:45:22 AM train 100  loss=0.2777  top1=90.50  top5=99.86
+04/02 11:46:50 AM train 150  loss=0.2787  top1=90.53  top5=99.80
+04/02 11:48:19 AM train 200  loss=0.2934  top1=90.01  top5=99.74
+04/02 11:49:19 AM train_acc 90.026667
+04/02 11:49:19 AM valid 000  loss=0.2846  top1=89.06  top5=100.00
+04/02 11:49:33 AM valid 050  loss=0.3739  top1=88.28  top5=99.53
+04/02 11:49:46 AM valid 100  loss=0.3707  top1=88.21  top5=99.55
+04/02 11:49:59 AM valid 150  loss=0.3636  top1=88.35  top5=99.60
+04/02 11:50:12 AM valid 200  loss=0.3639  top1=88.34  top5=99.57
+04/02 11:50:21 AM valid_acc 88.303333
+04/02 11:50:22 AM epoch 28  lr 3.756551e-02
+04/02 11:50:22 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('sep_conv_5x5', 2), ('sep_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2)], normal_concat=range(2, 6), reduce=[('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_3x3', 2), ('max_pool_3x3', 1), ('max_pool_3x3', 3), ('dil_conv_3x3', 2), ('sep_conv_5x5', 4), ('max_pool_3x3', 3)], reduce_concat=range(2, 6))
+04/02 11:50:24 AM train 000  loss=0.2719  top1=90.62  top5=100.00
+04/02 11:51:53 AM train 050  loss=0.2568  top1=91.76  top5=99.91
+04/02 11:53:22 AM train 100  loss=0.2654  top1=91.10  top5=99.86
+04/02 11:55:02 AM train 150  loss=0.2651  top1=91.10  top5=99.87
+04/02 11:56:44 AM train 200  loss=0.2715  top1=90.87  top5=99.88
+04/02 11:57:53 AM train_acc 90.803333
+04/02 11:57:55 AM valid 000  loss=0.3876  top1=87.50  top5=100.00
+04/02 11:58:09 AM valid 050  loss=0.4223  top1=86.38  top5=99.43
+04/02 11:58:25 AM valid 100  loss=0.4297  top1=86.29  top5=99.42
+04/02 11:58:39 AM valid 150  loss=0.4268  top1=86.26  top5=99.45
+04/02 11:58:53 AM valid 200  loss=0.4251  top1=86.39  top5=99.43
+04/02 11:59:03 AM valid_acc 86.320000
+04/02 11:59:05 AM epoch 29  lr 3.454915e-02
+04/02 11:59:05 AM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 2), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('sep_conv_5x5', 0), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2)], normal_concat=range(2, 6), reduce=[('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('max_pool_3x3', 1), ('max_pool_3x3', 3), ('dil_conv_3x3', 2), ('sep_conv_5x5', 4), ('max_pool_3x3', 3)], reduce_concat=range(2, 6))
+04/02 11:59:07 AM train 000  loss=0.2176  top1=94.53  top5=99.22
+04/02 12:00:46 PM train 050  loss=0.2407  top1=91.94  top5=99.85
+04/02 12:02:26 PM train 100  loss=0.2343  top1=92.26  top5=99.82
+04/02 12:04:07 PM train 150  loss=0.2436  top1=91.95  top5=99.79
+04/02 12:05:49 PM train 200  loss=0.2531  top1=91.67  top5=99.80
+04/02 12:06:58 PM train_acc 91.590000
+04/02 12:06:59 PM valid 000  loss=0.3985  top1=88.28  top5=100.00
+04/02 12:07:15 PM valid 050  loss=0.3673  top1=88.69  top5=99.54
+04/02 12:07:30 PM valid 100  loss=0.3768  top1=88.19  top5=99.54
+04/02 12:07:44 PM valid 150  loss=0.3738  top1=88.27  top5=99.51
+04/02 12:07:59 PM valid 200  loss=0.3741  top1=88.13  top5=99.53
+04/02 12:08:09 PM valid_acc 88.286667
+04/02 12:08:10 PM epoch 30  lr 3.159377e-02
+04/02 12:08:10 PM genotype = Genotype(normal=[('sep_conv_5x5', 0), ('dil_conv_5x5', 1), ('sep_conv_5x5', 2), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2), ('sep_conv_5x5', 0), ('sep_conv_5x5', 0), ('sep_conv_5x5', 2)], normal_concat=range(2, 6), reduce=[('dil_conv_5x5', 1), ('sep_conv_5x5', 0), ('sep_conv_3x3', 2), ('max_pool_3x3', 1), ('dil_conv_3x3', 2), ('max_pool_3x3', 3), ('sep_conv_5x5', 4), ('sep_conv_5x5', 3)], reduce_concat=range(2, 6))
+04/02 12:08:13 PM train 000  loss=0.1836  top1=93.75  top5=100.00
+04/02 12:10:02 PM train 050  loss=0.2243  top1=92.46  top5=99.83
+[2026-04-02T12:11:15.007] error: *** JOB 55780 ON margpu020 CANCELLED AT 2026-04-02T12:11:15 DUE TO TIME LIMIT ***
